@@ -6,6 +6,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ConfigManager {
 
@@ -48,6 +50,16 @@ public class ConfigManager {
         String prefix = getMessageRaw("prefix");
         String message = langConfig.getString(path, "§cMessaggio mancante: " + path);
         return color(prefix + message);
+    }
+
+    public List<String> getMessageList(String key) {
+        List<String> lines = langConfig.getStringList(key);
+        List<String> translated = new ArrayList<>();
+        for (String line : lines) {
+            // Applica i colori (ChatColor.translateAlternateColorCodes o il tuo sistema)
+            translated.add(org.bukkit.ChatColor.translateAlternateColorCodes('&', line));
+        }
+        return translated;
     }
 
     /**

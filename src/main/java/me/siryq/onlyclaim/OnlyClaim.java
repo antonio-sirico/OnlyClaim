@@ -1,9 +1,15 @@
 package me.siryq.onlyclaim;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
 import org.bukkit.Location;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class OnlyClaim extends JavaPlugin {
@@ -13,83 +19,144 @@ public class OnlyClaim extends JavaPlugin {
     private ConfigManager configManager;
     private ClaimToolListener claimToolListener;
 
+    // Gestione dei Task per le particelle persistenti
+    private final Map<UUID, Integer> particleTasks = new HashMap<>();
+    // Aggiungi questa variabile in cima alla classe OnlyClaim
+    private final Map<UUID, String> pendingNames = new HashMap<>();
+
+    // Aggiungi questi metodi per gestire i nomi
+    public void setPendingName(UUID uuid, String name) {
+        pendingNames.put(uuid, name);
+    }
+
+    public String getPendingName(UUID uuid) {
+        return pendingNames.get(uuid);
+    }
+
+    public void clearPendingName(UUID uuid) {
+        pendingNames.remove(uuid);
+    }
+
     @Override
     public void onEnable() {
         instance = this;
 
-        // Recupero versione dal plugin.yml
-        String version = getDescription().getVersion();
-
-        // 1. Inizializza Configurazione e Messaggi
+        // 1. Inizializzazione Configurazione e Messaggi
         this.configManager = new ConfigManager(this);
 
-        // 2. Inizializza il Manager dei Dati
+        // 2. Inizializzazione Manager Dati
         this.claimManager = new ClaimManager(this);
 
-        // 3. Inizializza e Registra i Listener
+        // 3. Registrazione Listener (Strumento e Protezione)
         this.claimToolListener = new ClaimToolListener(this);
         getServer().getPluginManager().registerEvents(this.claimToolListener, this);
         getServer().getPluginManager().registerEvents(new ProtectionListener(this), this);
 
-        // 4. Registra il comando principale
+        // 4. Registrazione Comandi
         if (getCommand("onlyclaim") != null) {
             getCommand("onlyclaim").setExecutor(new ClaimCommand(this));
         }
 
-        // Messaggio di avvio colorato in console
+        // Messaggio di avvio elegante e colorato
+        String version = getDescription().getVersion();
         Bukkit.getConsoleSender().sendMessage("");
-        Bukkit.getConsoleSender().sendMessage("§b§lOnlyClaim §8» §aPlugin abilitato correttamente! §7(v" + version + ")");
-        Bukkit.getConsoleSender().sendMessage("§b§lOnlyClaim §8» §fSistema di salvataggio .dat: §aATTIVO");
+        Bukkit.getConsoleSender().sendMessage("§b§lOnlyClaim §8» §aPlugin abilitato con successo! §7(v" + version + ")");
+        Bukkit.getConsoleSender().sendMessage("§b§lOnlyClaim §8» §fSistema di visualizzazione: §aATTIVO");
         Bukkit.getConsoleSender().sendMessage("");
     }
 
-    public void spawnBorderParticles(Player player, Location p1, Location p2) {
+    @Override
+    public void onDisable() {
+        // Ferma tutti i task delle particelle attivi per pulizia memoria
+        for (int taskId : particleTasks.values()) {
+            Bukkit.getScheduler().cancelTask(taskId);
+        }
+        particleTasks.clear();
+
+        // Salvataggio finale dei dati nel file .dat
+        if (claimManager != null) {
+            claimManager.saveClaims();
+            Bukkit.getConsoleSender().sendMessage("§b§lOnlyClaim §8» §eDati salvati correttamente. Alla prossima!");
+        }
+    }
+
+    // --- SISTEMA DI VISUALIZZAZIONE PARTICELLE ---
+
+    /**
+     * Avvia un task che mostra il perimetro del colore specificato.
+     * @param color Il colore delle particelle (es. Color.YELLOW per selezione, Color.LIME per view)
+     */
+    public void startVisualizer(Player player, Location p1, Location p2, Color color) {
+        UUID uuid = player.getUniqueId();
+        stopVisualizer(uuid); // Rimuove task precedenti
+
+        int taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
+            if (!player.isOnline()) {
+                stopVisualizer(uuid);
+                return;
+            }
+            spawnBorderParticles(player, p1, p2, color);
+        }, 0L, 20L); // Loop ogni secondo (20 ticks)
+
+        particleTasks.put(uuid, taskId);
+    }
+
+    /**
+     * Ferma la visualizzazione delle particelle.
+     */
+    public void stopVisualizer(UUID uuid) {
+        if (particleTasks.containsKey(uuid)) {
+            Bukkit.getScheduler().cancelTask(particleTasks.get(uuid));
+            particleTasks.remove(uuid);
+        }
+    }
+
+    /**
+     * Esegue il rendering fisico delle particelle DUST.
+     */
+    public void spawnBorderParticles(Player player, Location p1, Location p2, Color color) {
         if (p1 == null || p2 == null) return;
 
         double minX = Math.min(p1.getX(), p2.getX());
         double maxX = Math.max(p1.getX(), p2.getX()) + 1;
         double minZ = Math.min(p1.getZ(), p2.getZ());
         double maxZ = Math.max(p1.getZ(), p2.getZ()) + 1;
-        double y = player.getLocation().getY() + 1.0; // Altezza petto
 
-        // Creiamo il colore giallo (RGB)
-        org.bukkit.Particle.DustOptions dust = new org.bukkit.Particle.DustOptions(org.bukkit.Color.YELLOW, 1.5f);
+        // Altezza dinamica basata sulla posizione del giocatore per visibilità ottimale
+        double y = player.getLocation().getY() + 1.1;
 
-        // Disegniamo il perimetro (linee sottili di particelle)
+        Particle.DustOptions dustOptions = new Particle.DustOptions(color, 1.5f);
+
+        // Disegno perimetro
         for (double x = minX; x <= maxX; x += 0.5) {
-            player.spawnParticle(org.bukkit.Particle.DUST, x, y, minZ, 1, dust);
-            player.spawnParticle(org.bukkit.Particle.DUST, x, y, maxZ, 1, dust);
+            player.spawnParticle(Particle.DUST, x, y, minZ, 1, dustOptions);
+            player.spawnParticle(Particle.DUST, x, y, maxZ, 1, dustOptions);
         }
         for (double z = minZ; z <= maxZ; z += 0.5) {
-            player.spawnParticle(org.bukkit.Particle.DUST, minX, y, z, 1, dust);
-            player.spawnParticle(org.bukkit.Particle.DUST, maxX, y, z, 1, dust);
+            player.spawnParticle(Particle.DUST, minX, y, z, 1, dustOptions);
+            player.spawnParticle(Particle.DUST, maxX, y, z, 1, dustOptions);
         }
     }
 
-    @Override
-    public void onDisable() {
-        // Salvataggio finale
-        if (claimManager != null) {
-            claimManager.saveClaims();
-            Bukkit.getConsoleSender().sendMessage("§b§lOnlyClaim §8» §eDati salvati e plugin disabilitato.");
-        }
-    }
+    // --- UTILS ---
 
     /**
-     * Recupera le posizioni selezionate da un giocatore.
+     * Riproduce un suono per il giocatore.
      */
+    public void playSound(Player player, Sound sound) {
+        player.playSound(player.getLocation(), sound, 1.0f, 1.0f);
+    }
+
     public Location[] getSelection(UUID uuid) {
         if (claimToolListener == null) return null;
         return claimToolListener.getSelections().get(uuid);
     }
 
-    /**
-     * Pulisce la selezione attuale di un giocatore.
-     */
     public void clearSelection(UUID uuid) {
         if (claimToolListener != null) {
             claimToolListener.getSelections().remove(uuid);
         }
+        stopVisualizer(uuid);
     }
 
     // --- GETTER ---

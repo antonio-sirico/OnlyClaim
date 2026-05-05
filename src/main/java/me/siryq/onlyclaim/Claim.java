@@ -1,18 +1,24 @@
 package me.siryq.onlyclaim;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class Claim implements java.io.Serializable {
+public class Claim implements Serializable {
     private static final long serialVersionUID = 1L;
+
     private final UUID owner;
     private String name;
-    private final World world;
+
+    // CORREZIONE: Usiamo il nome del mondo come stringa per evitare errori CraftWorld
+    private final String worldName;
+
     private final int minX, minY, minZ;
     private final int maxX, maxY, maxZ;
 
@@ -20,16 +26,12 @@ public class Claim implements java.io.Serializable {
     private final List<Claim> subClaims;
     private final boolean isSubClaim;
 
-    /**
-     * Costruttore per un nuovo Claim o Sottoclaim.
-     */
     public Claim(UUID owner, String name, Location pos1, Location pos2, boolean isSubClaim) {
         this.owner = owner;
         this.name = name;
-        this.world = pos1.getWorld();
+        this.worldName = pos1.getWorld().getName();
         this.isSubClaim = isSubClaim;
 
-        // Calcoliamo min e max per creare il rettangolo di protezione
         this.minX = Math.min(pos1.getBlockX(), pos2.getBlockX());
         this.minY = Math.min(pos1.getBlockY(), pos2.getBlockY());
         this.minZ = Math.min(pos1.getBlockZ(), pos2.getBlockZ());
@@ -43,30 +45,26 @@ public class Claim implements java.io.Serializable {
     }
 
     /**
-     * Verifica se una posizione specifica si trova all'interno di questo claim.
+     * Verifica se una posizione si trova nel claim (anche su mondi diversi).
      */
     public boolean contains(Location loc) {
-        if (!loc.getWorld().equals(world)) return false;
+        if (!loc.getWorld().getName().equals(this.worldName)) return false;
 
-        return loc.getBlockX() >= minX && loc.getBlockX() <= maxX &&
-                loc.getBlockY() >= minY && loc.getBlockY() <= maxY &&
-                loc.getBlockZ() >= minZ && loc.getBlockZ() <= maxZ;
+        // Usiamo blockX per essere sicuri di prendere l'intero blocco
+        int x = loc.getBlockX();
+        int z = loc.getBlockZ();
+
+        return x >= minX && x <= maxX && z >= minZ && z <= maxZ;
     }
 
     /**
-     * Calcola l'area totale (superficie 2D) del claim.
-     * Serve per il calcolo del budget basato sui chunk (1 chunk = 256 blocchi).
+     * Calcola l'area 2D (superficie).
      */
     public int getArea() {
-        int width = (maxX - minX) + 1;
-        int length = (maxZ - minZ) + 1;
-        return width * length;
+        return ((maxX - minX) + 1) * ((maxZ - minZ) + 1);
     }
 
-    /**
-     * Restituisce il valore di una flag. Se non impostata nel claim,
-     * restituisce il valore di default passato.
-     */
+    // --- FLAGS ---
     public boolean getFlag(String flag, boolean defaultValue) {
         return flags.getOrDefault(flag, defaultValue);
     }
@@ -75,7 +73,7 @@ public class Claim implements java.io.Serializable {
         flags.put(flag, value);
     }
 
-    // --- GETTER E SETTER ---
+    // --- GETTER ---
 
     public UUID getOwner() {
         return owner;
@@ -103,13 +101,22 @@ public class Claim implements java.io.Serializable {
         return isSubClaim;
     }
 
+    /**
+     * Recupera l'oggetto World dal nome salvato.
+     * Utile per le particelle e teletrasporti.
+     */
     public World getWorld() {
-        return world;
+        return Bukkit.getWorld(worldName);
     }
 
-    // Metodi di utilità per il salvataggio (coordinate grezze)
+    public String getWorldName() {
+        return worldName;
+    }
+
     public int getMinX() { return minX; }
     public int getMaxX() { return maxX; }
+    public int getMinY() { return minY; }
+    public int getMaxY() { return maxY; }
     public int getMinZ() { return minZ; }
     public int getMaxZ() { return maxZ; }
 }

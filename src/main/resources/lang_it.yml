@@ -13,6 +13,8 @@ only-players: "&cSolo i giocatori possono usare questo comando."
 cannot-build: "&cNon puoi costruire in questo territorio!"
 area-overlapping: "&cQuesta area si sovrappone a un claim esistente!"
 hotbar-full: "&cLa tua hotbar è piena! Libera uno slot per ricevere lo strumento."
+claim-already-exists: "&cEsiste già un territorio con questo nome!"
+claim-not-found: "&cNessun territorio trovato con questo nome."
 
 # ------------------------------------------
 # Gestione Strumento (Claim Tool)
@@ -22,19 +24,39 @@ claim-tool-lore: "&eScegli l'area da proteggere\n&7Sinistro: &bPos 1\n&7Destro: 
 tool-received: "&aHai ricevuto lo strumento di claim!"
 pos-1-set: "&aPosizione 1 impostata!"
 pos-2-set: "&aPosizione 2 impostata!"
-select-points-first: "&cDevi prima selezionare due punti con la zappa!"
+select-points-first: "&cDevi prima selezionare due punti con lo strumento!"
 
 # ------------------------------------------
 # Creazione e Gestione Territori
 # ------------------------------------------
-claim-created: "&aHai creato un claim con successo!"
-limit-exceeded: "&cArea troppo vasta! Il tuo limite è di {max} chunk ({blocks} blocchi), questa selezione ne occupa {current}."
+claim-created: "&a&lCREATO"
+claim-deleted: "&cIl territorio &f{name} &cè stato eliminato correttamente."
+limit-exceeded: "&cArea troppo vasta!"
+limit-exceeded-sub: "&7Limite: &f{max} &7blocchi totali."
 not-in-any-claim: "&cNon ti trovi in nessun territorio!"
+view-claim: "&aConfini visualizzati in verde"
+pending-name-set: "&eNome impostato: &b{name}&e. Seleziona l'area e digita &b/oc confirm&e."
+selection-summary:
+  - "&8&m---------------------------------"
+  - "&eArea selezionata per il claim: &b{name}"
+  - "&eDigita &a/oc confirm &eper terminare."
+  - "&8&m---------------------------------"
+default-claim-name-format: "{player}_CLAIM"
 
-# Rinomina
-claim-renamed: "&aIl territorio è stato rinominato in: &f{name}"
-invalid-name: "&cInserisci un nome valido per il territorio."
-rename-usage: "&cUtilizzo: /oc rename <nome>"
+# ------------------------------------------
+# Notifiche di Spostamento (Entrata/Uscita)
+# ------------------------------------------
+enter-claim-title: "&b{name}"
+enter-claim-subtitle: "&7Proprietario: &f{owner}"
+exit-claim-title: "&eZona Libera"
+exit-claim-subtitle: "&7Puoi costruire liberamente"
+unknown-player: "Sconosciuto"
+
+# Utilizzo Comandi
+create-usage: "&cUtilizzo: /oc create <nome>"
+delete-usage: "&cUtilizzo: /oc delete <nome> (o trovati all'interno)"
+rename-usage: "&cUtilizzo: /oc rename <nuovoNome>"
+claim-renamed: "&aTerritorio rinominato in: &f{name}"
 
 # Flag
 flag-changed: "&eFlag {flag} impostato su {value}."
@@ -42,18 +64,20 @@ flag-changed: "&eFlag {flag} impostato su {value}."
 # ------------------------------------------
 # Sezione Sottoclaim
 # ------------------------------------------
-subclaim-created: "&b&lSottoclaim&a creato con successo!"
-no-subclaim-permission: "&cNon hai il permesso di creare sottoclaim con il tuo grado attuale."
-max-subclaims-reached: "&cHai raggiunto il limite massimo di sottoclaim per questo territorio."
-not-in-your-claim: "&cDevi essere dentro un TUO territorio per creare un sottoclaim!"
-subclaim-out-of-bounds: "&cIl sottoclaim deve essere interamente contenuto nel territorio principale!"
+subclaim-created: "&b&lSOTTOCLAIM"
+no-subclaim-permission: "&cNon hai il permesso di creare sottoclaim."
+max-subclaims-reached: "&cHai raggiunto il limite massimo di sottoclaim."
+not-in-your-claim: "&cDevi essere dentro un TUO territorio per farlo!"
+subclaim-out-of-bounds: "&cIl sottoclaim deve essere contenuto nel territorio principale!"
 
 # ------------------------------------------
 # Menu di Aiuto (Comandi)
 # ------------------------------------------
-help-header: "&b--- &3OnlyClaim Help &b---"
-help-tool: "&b/oc tool &7- Ricevi lo strumento di selezione"
-help-confirm: "&b/oc confirm &7- Crea il territorio principale"
-help-subclaim: "&b/oc subclaim &7- Crea un sottoclaim nell'area"
-help-rename: "&b/oc rename <nome> &7- Rinomina il territorio attuale"
-help-view: "&b/oc view &7- Visualizza i confini del territorio attuale"
+help-header: "&8&m----------------&r &bOnlyClaim &8&m----------------"
+help-tool: " &b/oc &7- Ricevi lo strumento di selezione"
+help-create: " &b/oc create <nome> &7- Crea un territorio con nome"
+help-confirm: " &b/oc confirm &7- Crea con nome automatico"
+help-delete: " &b/oc delete <nome> &7- Elimina un territorio"
+help-subclaim: " &b/oc subclaim &7- Crea un sottoclaim nell'area"
+help-rename: " &b/oc rename <nome> &7- Rinomina il territorio attuale"
+help-view: " &b/oc view &7- Visualizza i confini"
