@@ -1,0 +1,64 @@
+# ==========================================
+# OnlyClaim - Configurazione Principale
+# ==========================================
+
+# Lingua del plugin (corrisponde al file lang_XX.yml)
+# Se imposti 'it', il plugin cercherà 'lang_it.yml'
+language: 'it'
+
+# ------------------------------------------
+# Impostazioni di Default per i Claim
+# ------------------------------------------
+# Queste flag vengono applicate ogni volta che un giocatore crea un territorio.
+# true = permesso | false = negato
+default-flags:
+  tnt: false
+  block-break: false
+  block-place: false
+  interact: false
+  pvp: false
+
+# ------------------------------------------
+# Gestione Gruppi e Limiti (Basata su Chunk)
+# ------------------------------------------
+# Ogni chunk equivale a 256 blocchi (16x16).
+# Il plugin calcolerà l'area totale dei blocchi selezionati
+# e verificherà se rientra nel budget di chunk del giocatore.
+#
+# Se un giocatore ha più permessi, verrà considerato il valore più alto.
+
+# ... (resto del config precedente)
+
+groups:
+  default:
+    permission: "onlyclaim.group.default"
+    max-chunks: 4
+    max-claims: 1
+    # Abilita o disabilita la creazione di sottoclaim per questo gruppo
+    allow-subclaims: false
+    # Numero massimo di sottoclaim per ogni claim principale
+    max-subclaims: 0
+
+  vip:
+    permission: "onlyclaim.group.vip"
+    max-chunks: 16
+    max-claims: 5
+    allow-subclaims: true
+    max-subclaims: 3
+
+  ultra:
+    permission: "onlyclaim.group.ultra"
+    max-chunks: 64
+    max-claims: 10
+    allow-subclaims: true
+    max-subclaims: 10
+
+# ------------------------------------------
+# Impostazioni Amministratore
+# ------------------------------------------
+# Giocatori con questo permesso possono ignorare le protezioni
+# e gestire i claim degli altri.
+admin-permission: "onlyclaim.admin"
+
+# Frequenza di salvataggio automatico (in minuti)
+autosave-interval: 10

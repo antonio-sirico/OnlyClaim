@@ -1,0 +1,59 @@
+# ==========================================
+# OnlyClaim - File di Localizzazione (Italiano)
+# ==========================================
+
+# Prefisso principale per i messaggi in chat
+prefix: "&b&lOnlyClaim &8»&r "
+
+# ------------------------------------------
+# Messaggi di Errore e Permessi
+# ------------------------------------------
+no-permission: "&cNon hai il permesso per farlo!"
+only-players: "&cSolo i giocatori possono usare questo comando."
+cannot-build: "&cNon puoi costruire in questo territorio!"
+area-overlapping: "&cQuesta area si sovrappone a un claim esistente!"
+hotbar-full: "&cLa tua hotbar è piena! Libera uno slot per ricevere lo strumento."
+
+# ------------------------------------------
+# Gestione Strumento (Claim Tool)
+# ------------------------------------------
+claim-tool-name: "&6&lCLAIMTOOL"
+claim-tool-lore: "&eScegli l'area da proteggere\n&7Sinistro: &bPos 1\n&7Destro: &bPos 2"
+tool-received: "&aHai ricevuto lo strumento di claim!"
+pos-1-set: "&aPosizione 1 impostata!"
+pos-2-set: "&aPosizione 2 impostata!"
+select-points-first: "&cDevi prima selezionare due punti con la zappa!"
+
+# ------------------------------------------
+# Creazione e Gestione Territori
+# ------------------------------------------
+claim-created: "&aHai creato un claim con successo!"
+limit-exceeded: "&cArea troppo vasta! Il tuo limite è di {max} chunk ({blocks} blocchi), questa selezione ne occupa {current}."
+not-in-any-claim: "&cNon ti trovi in nessun territorio!"
+
+# Rinomina
+claim-renamed: "&aIl territorio è stato rinominato in: &f{name}"
+invalid-name: "&cInserisci un nome valido per il territorio."
+rename-usage: "&cUtilizzo: /oc rename <nome>"
+
+# Flag
+flag-changed: "&eFlag {flag} impostato su {value}."
+
+# ------------------------------------------
+# Sezione Sottoclaim
+# ------------------------------------------
+subclaim-created: "&b&lSottoclaim&a creato con successo!"
+no-subclaim-permission: "&cNon hai il permesso di creare sottoclaim con il tuo grado attuale."
+max-subclaims-reached: "&cHai raggiunto il limite massimo di sottoclaim per questo territorio."
+not-in-your-claim: "&cDevi essere dentro un TUO territorio per creare un sottoclaim!"
+subclaim-out-of-bounds: "&cIl sottoclaim deve essere interamente contenuto nel territorio principale!"
+
+# ------------------------------------------
+# Menu di Aiuto (Comandi)
+# ------------------------------------------
+help-header: "&b--- &3OnlyClaim Help &b---"
+help-tool: "&b/oc tool &7- Ricevi lo strumento di selezione"
+help-confirm: "&b/oc confirm &7- Crea il territorio principale"
+help-subclaim: "&b/oc subclaim &7- Crea un sottoclaim nell'area"
+help-rename: "&b/oc rename <nome> &7- Rinomina il territorio attuale"
+help-view: "&b/oc view &7- Visualizza i confini del territorio attuale"
