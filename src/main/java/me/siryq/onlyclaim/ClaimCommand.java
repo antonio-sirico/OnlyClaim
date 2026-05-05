@@ -28,6 +28,13 @@ public class ClaimCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+        // Il comando reload è l'unico accessibile anche da console
+        if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
+            reloadPlugin(sender);
+            return true;
+        }
+
+        // Controllo per tutti gli altri comandi (solo Player)
         if (!(sender instanceof Player player)) {
             sender.sendMessage(plugin.getConfigManager().getMessageRaw("only-players"));
             return true;
@@ -54,12 +61,31 @@ public class ClaimCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    private void reloadPlugin(CommandSender sender) {
+        if (!sender.hasPermission("onlyclaim.admin.reload")) {
+            sender.sendMessage(plugin.getConfigManager().getMessage("no-permission"));
+            return;
+        }
+
+        // Ricarica la config principale di Bukkit
+        plugin.reloadConfig();
+
+        // Ricarica i file gestiti dal tuo ConfigManager (config e lang)
+        plugin.getConfigManager().reloadAll();
+
+        sender.sendMessage(plugin.getConfigManager().getMessage("plugin-reloaded"));
+
+        if (sender instanceof Player p) {
+            plugin.playSound(p, Sound.BLOCK_NOTE_BLOCK_PLING);
+        }
+    }
+
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
         if (!(sender instanceof Player player)) return null;
 
         if (args.length == 1) {
-            List<String> subCommands = List.of("create", "confirm", "delete", "remove", "subclaim", "view", "rename", "help", "flag", "rtp");
+            List<String> subCommands = List.of("create", "confirm", "delete", "remove", "subclaim", "view", "rename", "help", "flag", "rtp", "reload");
             return filterTabs(subCommands, args[0]);
         }
 

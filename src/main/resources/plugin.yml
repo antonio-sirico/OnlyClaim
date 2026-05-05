@@ -1,15 +1,14 @@
 name: OnlyClaim
 main: me.siryq.onlyclaim.OnlyClaim
-version: '1.2.0'
-api-version: '1.21.11' # Modifica in base alla versione del tuo server
+version: '1.2.1'
+api-version: '1.21' # Standardizzato alla versione API (senza patch)
 author: SiryQ
-description: Plugin avanzato per la protezione dei territori con supporto sottoclaim.
+description: Plugin avanzato per la protezione dei territori con supporto sottoclaim, RTP e gestione flag.
 
 commands:
   onlyclaim:
     description: Comando principale di OnlyClaim
     usage: /onlyclaim help
-    # Gli alias permettono ai giocatori di usare scorciatoie
     aliases: [claim, oc]
     permission: onlyclaim.command.use
 
@@ -20,6 +19,15 @@ permissions:
   onlyclaim.command.tool:
     description: Permette di ricevere lo strumento di claim
     default: true
+  onlyclaim.command.rtp:
+    description: Permette di usare il comando /oc rtp
+    default: true
+  onlyclaim.rtp.bypass:
+    description: Permette di ignorare il cooldown dell'RTP
+    default: op
+  onlyclaim.admin.reload:
+    description: Permette di ricaricare la configurazione del plugin
+    default: op
   onlyclaim.admin:
     description: Permesso per ignorare le protezioni e gestire i claim altrui
     default: op

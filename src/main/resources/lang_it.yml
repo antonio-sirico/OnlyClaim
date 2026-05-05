@@ -15,6 +15,7 @@ area-overlapping: "&cQuesta area si sovrappone a un claim esistente!"
 hotbar-full: "&cLa tua hotbar è piena! Libera uno slot per ricevere lo strumento."
 claim-already-exists: "&cEsiste già un territorio con questo nome!"
 claim-not-found: "&cNessun territorio trovato con questo nome."
+plugin-reloaded: "&fConfigurazione e Lingua ricaricate con successo!"
 
 # ------------------------------------------
 # Gestione Strumento (Claim Tool)

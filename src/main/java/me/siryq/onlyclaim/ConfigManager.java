@@ -42,6 +42,16 @@ public class ConfigManager {
     }
 
     /**
+     * Ricarica tutti i file di configurazione (config.yml e lingua).
+     */
+    public void reloadAll() {
+        // Ricarica il config.yml di Spigot/Bukkit
+        plugin.reloadConfig();
+        // Ricarica il file della lingua specifico
+        loadLanguage();
+    }
+
+    /**
      * Recupera un messaggio colorato con prefisso.
      */
     public String getMessage(String path) {
@@ -50,18 +60,20 @@ public class ConfigManager {
         return color(prefix + message);
     }
 
+    /**
+     * Recupera una lista di messaggi colorati.
+     */
     public List<String> getMessageList(String key) {
         List<String> lines = langConfig.getStringList(key);
         List<String> translated = new ArrayList<>();
         for (String line : lines) {
-            // Applica i colori (ChatColor.translateAlternateColorCodes o il tuo sistema)
-            translated.add(org.bukkit.ChatColor.translateAlternateColorCodes('&', line));
+            translated.add(color(line));
         }
         return translated;
     }
 
     /**
-     * Recupera un messaggio colorato SENZA prefisso (per nomi oggetti o lore).
+     * Recupera un messaggio colorato SENZA prefisso.
      */
     public String getMessageRaw(String path) {
         String message = langConfig.getString(path, "");
