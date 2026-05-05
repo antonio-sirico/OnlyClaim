@@ -95,6 +95,21 @@ public class Claim implements Serializable {
         }
     }
 
+    /**
+     * Calcola il centro geometrico del claim.
+     * @param world Il mondo in cui si trova il claim.
+     * @return La Location centrale (altezza safe basata sulla superficie).
+     */
+    public Location getCenter(org.bukkit.World world) {
+        double centerX = (minX + maxX) / 2.0;
+        double centerZ = (minZ + maxZ) / 2.0;
+
+        // Otteniamo la coordinata Y più alta per evitare che il player soffochi o cada
+        int safeY = world.getHighestBlockYAt((int) centerX, (int) centerZ) + 1;
+
+        return new Location(world, centerX, safeY, centerZ);
+    }
+
     public boolean isSubClaim() {
         return isSubClaim;
     }

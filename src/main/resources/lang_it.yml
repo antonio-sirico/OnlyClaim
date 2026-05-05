@@ -1,5 +1,5 @@
 # ==========================================
-# OnlyClaim - File di Localizzazione (Italiano)
+# OnlyClaim - File di Lingua (Italiano)
 # ==========================================
 
 # Prefisso principale per i messaggi in chat
@@ -16,6 +16,35 @@ hotbar-full: "&cLa tua hotbar è piena! Libera uno slot per ricevere lo strument
 claim-already-exists: "&cEsiste già un territorio con questo nome!"
 claim-not-found: "&cNessun territorio trovato con questo nome."
 plugin-reloaded: "&fConfigurazione e Lingua ricaricate con successo!"
+
+# ------------------------------------------
+# Configurazione GUI
+# ------------------------------------------
+gui-main-title: "&8&lI TUOI TERRITORI"
+gui-sub-title: "&8Sottoclaim di: &b{parent}"
+
+# Elementi Territorio (Grass)
+gui-item-claim-name: "&a&l{name}"
+gui-item-claim-lore:
+  - "&7Dimensione: &f{chunks} Chunk"
+  - "&7Sottoclaim: &b{subs}"
+  - "&7Occupazione totale: &e{total_used}&8/&6{max_chunks}"
+  - ""
+  - "&eClicca per gestire i sottoclaim"
+
+# Elementi Sottoclaim (Dirt)
+gui-item-sub-name: "&6Sottoclaim &7({name})"
+gui-item-sub-lore:
+  - "&7Dimensione: &f{chunks} Chunk"
+  - "&7Coordinate: &f{x}, {z}"
+  - ""
+  - "&eClicca per visualizzare"
+
+# Navigazione
+gui-nav-prev: "&7« Pagina Precedente"
+gui-nav-next: "&7Pagina Successiva »"
+gui-nav-close: "&c&lCHIUDI MENU"
+gui-nav-back: "&e&lTORNA AI TERRITORI"
 
 # ------------------------------------------
 # Gestione Strumento (Claim Tool)
@@ -35,7 +64,8 @@ claim-deleted: "&cIl territorio &f{name} &cè stato eliminato correttamente."
 limit-exceeded: "&cArea troppo vasta!"
 limit-exceeded-sub: "&7Limite: &f{max} &7blocchi totali."
 not-in-any-claim: "&cNon ti trovi in nessun territorio!"
-view-claim: "&aConfini visualizzati in verde"
+viewing-claim: "&aVisualizzazione confini del territorio: &f{name}"
+view-stopped-exit: "&cVisualizzazione interrotta: sei uscito dal territorio."
 pending-name-set: "&eNome impostato: &b{name}&e. Seleziona l'area e digita &b/oc confirm&e."
 selection-summary:
   - "&8&m---------------------------------"
@@ -43,6 +73,13 @@ selection-summary:
   - "&eDigita &a/oc confirm &eper terminare."
   - "&8&m---------------------------------"
 default-claim-name-format: "{player}_CLAIM"
+claim-renamed: "&aTerritorio rinominato in: &f{name}"
+
+# ------------------------------------------
+# Teletrasporto (Home/TP)
+# ------------------------------------------
+home-usage: "&cUtilizzo: /oc home <nomeTerritorio>"
+teleported-to: "&aTeletrasportato al territorio: &f{name}"
 
 # ------------------------------------------
 # Notifiche di Spostamento (Entrata/Uscita)
@@ -53,10 +90,9 @@ exit-claim-title: "&eZona Libera"
 exit-claim-subtitle: "&7Puoi costruire liberamente"
 unknown-player: "Sconosciuto"
 
-
-# -------
+# ------------------------------------------
 # RTP
-# -------
+# ------------------------------------------
 rtp-prefix: "&5&lRTP&8»&r "
 rtp-searching: "{prefix}&e&oCercando una zona sicura..."
 rtp-no-location: "{prefix}&cNon abbiamo trovato zone sicure libere. Riprova!"
@@ -64,13 +100,12 @@ rtp-cooldown-msg: "{prefix}&cAttendi ancora &6{time}s &cper riutilizzare l'RTP."
 rtp-title: "&a&lRTP"
 rtp-subtitle: "&7Ti trovi ora in una zona selvaggia!"
 
-# Utilizzo Comandi
+# ------------------------------------------
+# Utilizzo Comandi & Flag
+# ------------------------------------------
 create-usage: "&cUtilizzo: /oc create <nome>"
 delete-usage: "&cUtilizzo: /oc delete <nome> (o trovati all'interno)"
 rename-usage: "&cUtilizzo: /oc rename <nuovoNome>"
-claim-renamed: "&aTerritorio rinominato in: &f{name}"
-
-# Flag
 flag-usage: "&eUtilizzo: &f/oc flag <nome> <flag> <true|false>"
 flag-updated: "&aFlag &e{flag} &aimpostata su &e{value} &aper il claim &b{name}&a."
 flag-changed: "&eFlag {flag} impostato su {value}."
@@ -92,6 +127,10 @@ help-tool: " &b/oc &7- Ricevi lo strumento di selezione"
 help-create: " &b/oc create <nome> &7- Crea un territorio con nome"
 help-confirm: " &b/oc confirm &7- Crea con nome automatico"
 help-delete: " &b/oc delete <nome> &7- Elimina un territorio"
+help-list: " &b/oc list &7- Apri l'interfaccia dei tuoi territori"
+help-home: " &b/oc home <nome> &7- Teletrasportati al territorio"
 help-subclaim: " &b/oc subclaim &7- Crea un sottoclaim nell'area"
 help-rename: " &b/oc rename <nome> &7- Rinomina il territorio attuale"
-help-view: " &b/oc view &7- Visualizza i confini"
+help-view: " &b/oc view [nome] &7- Visualizza i confini"
+help-rtp: " &b/oc rtp &7- Teletrasporto casuale"
+help-reload: " &b/oc reload &7- Ricarica configurazione (Admin)"

@@ -1,9 +1,9 @@
 name: OnlyClaim
 main: me.siryq.onlyclaim.OnlyClaim
-version: '1.2.1'
-api-version: '1.21' # Standardizzato alla versione API (senza patch)
+version: '1.3.0'
+api-version: '1.21'
 author: SiryQ
-description: Plugin avanzato per la protezione dei territori con supporto sottoclaim, RTP e gestione flag.
+description: Plugin avanzato per la protezione dei territori con supporto sottoclaim, RTP, GUI e Teletrasporto.
 
 commands:
   onlyclaim:
@@ -21,6 +21,15 @@ permissions:
     default: true
   onlyclaim.command.rtp:
     description: Permette di usare il comando /oc rtp
+    default: true
+  onlyclaim.command.list:
+    description: Permette di visualizzare la GUI dei claim
+    default: true
+  onlyclaim.tp.claim:
+    description: Permette di teletrasportarsi ai territori principali
+    default: true
+  onlyclaim.tp.subclaim:
+    description: Permette di teletrasportarsi ai sottoclaim
     default: true
   onlyclaim.rtp.bypass:
     description: Permette di ignorare il cooldown dell'RTP

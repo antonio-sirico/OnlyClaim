@@ -50,11 +50,13 @@ public class ClaimCommand implements CommandExecutor, TabCompleter {
             case "confirm" -> confirmClaim(player);
             case "delete", "remove" -> deleteClaimByName(player, args);
             case "subclaim" -> confirmSubClaim(player);
-            case "view" -> viewClaim(player);
+            case "view" -> viewClaim(player, args);
             case "rename" -> renameClaim(player, args);
             case "help" -> sendHelp(player);
             case "flag" -> setClaimFlag(player, args);
             case "rtp" -> plugin.getRtpManager().teleportRandomly(player);
+            case "home", "tp" -> teleportToClaim(player, args);
+            case "list" -> plugin.getGuiManager().openClaimsMenu(player);
             default -> giveClaimTool(player);
         }
 
@@ -258,19 +260,51 @@ public class ClaimCommand implements CommandExecutor, TabCompleter {
         plugin.stopVisualizer(player.getUniqueId());
     }
 
-    private void viewClaim(Player player) {
-        Claim claim = plugin.getClaimManager().getClaimAt(player.getLocation());
+    private void viewClaim(Player player, String[] args) {
+        Claim claim;
+        if (args.length < 2) {
+            claim = plugin.getClaimManager().getClaimAt(player.getLocation());
+        } else {
+            claim = plugin.getClaimManager().getClaimByName(args[1]);
+        }
+
         if (claim == null) {
-            player.sendMessage(plugin.getConfigManager().getMessage("not-in-any-claim"));
-            plugin.playSound(player, Sound.ENTITY_VILLAGER_NO);
+            player.sendMessage(plugin.getConfigManager().getMessage("claim-not-found"));
             return;
         }
 
+        // Visualizzazione (Particle)
         Location loc1 = new Location(player.getWorld(), claim.getMinX(), player.getLocation().getY(), claim.getMinZ());
         Location loc2 = new Location(player.getWorld(), claim.getMaxX(), player.getLocation().getY(), claim.getMaxZ());
-
         plugin.startVisualizer(player, loc1, loc2, Color.LIME);
-        player.sendMessage(plugin.getConfigManager().getMessage("view-claim"));
+
+        player.sendMessage(plugin.getConfigManager().getMessage("viewing-claim").replace("{name}", claim.getName()));
+    }
+
+    private void teleportToClaim(Player player, String[] args) {
+        if (args.length < 2) {
+            player.sendMessage(plugin.getConfigManager().getMessage("home-usage"));
+            return;
+        }
+
+        Claim claim = plugin.getClaimManager().getClaimByName(args[1]);
+        if (claim == null) {
+            player.sendMessage(plugin.getConfigManager().getMessage("claim-not-found"));
+            return;
+        }
+
+        // Controllo permessi specifico
+        String perm = claim.isSubClaim() ? "onlyclaim.tp.subclaim" : "onlyclaim.tp.claim";
+        if (!player.hasPermission(perm) && !claim.getOwner().equals(player.getUniqueId())) {
+            player.sendMessage(plugin.getConfigManager().getMessage("no-permission"));
+            return;
+        }
+
+        // Teletrasporto al centro del claim (o potresti aggiungere un campo 'spawn' alla classe Claim)
+        Location center = claim.getCenter(player.getWorld());
+        player.teleport(center.add(0.5, 1, 0.5));
+        player.sendMessage(plugin.getConfigManager().getMessage("teleported-to").replace("{name}", claim.getName()));
+        plugin.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT);
     }
 
     @SuppressWarnings("deprecation")

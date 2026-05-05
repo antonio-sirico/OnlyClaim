@@ -126,7 +126,10 @@ public class ProtectionListener implements Listener {
             player.sendTitle(title, sub, 10, 40, 10);
 
             // Spegniamo visualizzatori particelle (view o selezione)
-            plugin.stopVisualizer(player.getUniqueId());
+            if (plugin.hasActiveVisualizer(player.getUniqueId())) {
+                plugin.stopVisualizer(player.getUniqueId());
+                player.sendMessage(plugin.getConfigManager().getMessage("view-stopped-exit"));
+            }
         }
     }
 

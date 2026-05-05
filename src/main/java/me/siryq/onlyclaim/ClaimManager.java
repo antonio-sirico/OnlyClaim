@@ -23,11 +23,11 @@ public class ClaimManager {
      * Salva la lista dei claim in formato binario .dat
      */
     public void saveClaims() {
+        // Gestione corretta della creazione cartella con controllo errore
         if (!plugin.getDataFolder().exists()) {
-            boolean created = plugin.getDataFolder().mkdirs();
-            if (!created) {
-                plugin.getLogger().warning("Impossibile creare la cartella dei dati!");
-                // Volendo puoi interrompere qui se la cartella è vitale
+            if (!plugin.getDataFolder().mkdirs()) {
+                plugin.getLogger().severe("ERRORE CRITICO: Impossibile creare la cartella OnlyClaim!");
+                return;
             }
         }
 
@@ -37,9 +37,7 @@ public class ClaimManager {
             plugin.getLogger().severe("Errore critico nel salvataggio claims.dat: " + e.getMessage());
         }
     }
-    /**
-     * Carica la lista dei claim dal file binario .dat
-     */
+
     @SuppressWarnings("unchecked")
     private void loadClaims() {
         if (!dataFile.exists()) return;
@@ -56,13 +54,9 @@ public class ClaimManager {
         }
     }
 
-    /**
-     * Trova il claim (o sottoclaim) in una posizione specifica.
-     */
     public Claim getClaimAt(Location loc) {
         for (Claim claim : claims) {
             if (claim.contains(loc)) {
-                // Se siamo dentro un claim, controlliamo se siamo sopra un sottoclaim più specifico
                 for (Claim sub : claim.getSubClaims()) {
                     if (sub.contains(loc)) return sub;
                 }
@@ -72,41 +66,26 @@ public class ClaimManager {
         return null;
     }
 
-    /**
-     * Aggiunge un nuovo claim e salva i dati.
-     */
     public void addClaim(Claim claim) {
         this.claims.add(claim);
         saveClaims();
     }
 
-    /**
-     * Rimuove un claim dal database e salva le modifiche.
-     * @param claim Il claim da rimuovere.
-     */
     public void removeClaim(Claim claim) {
-        // Se è un sottoclaim, dobbiamo cercarlo all'interno del claim padre per rimuoverlo correttamente
         for (Claim main : claims) {
             if (main.getSubClaims().remove(claim)) {
                 saveClaims();
                 return;
             }
         }
-
-        // Se arriviamo qui, era un claim principale
         if (claims.remove(claim)) {
             saveClaims();
         }
     }
 
-    /**
-     * Cerca un claim nella lista globale tramite il suo nome (case-insensitive).
-     */
     public Claim getClaimByName(String name) {
         for (Claim claim : claims) {
             if (claim.getName().equalsIgnoreCase(name)) return claim;
-
-            // Cerca anche tra i sottoclaim se necessario
             for (Claim sub : claim.getSubClaims()) {
                 if (sub.getName().equalsIgnoreCase(name)) return sub;
             }
@@ -114,53 +93,59 @@ public class ClaimManager {
         return null;
     }
 
-    /**
-     * Verifica se un nome di claim è già stato utilizzato.
-     */
     public boolean exists(String name) {
         return claims.stream().anyMatch(c -> c.getName().equalsIgnoreCase(name));
     }
 
     /**
-     * Calcola l'area totale occupata da un giocatore (in blocchi).
+     * Calcola l'area totale occupata da un giocatore (solo claim principali).
      */
     public int getTotalUsedArea(UUID ownerUUID) {
         return claims.stream()
-                .filter(c -> c.getOwner().equals(ownerUUID))
+                .filter(c -> c.getOwner().equals(ownerUUID) && !c.isSubClaim())
                 .mapToInt(Claim::getArea)
                 .sum();
     }
 
     /**
-     * Logica dei limiti: controlla se il giocatore ha abbastanza chunk
-     * basandosi sul suo gruppo di permessi nel config.yml.
+     * Restituisce il numero massimo di chunk permessi.
      */
-    public boolean canClaimMore(Player player, int areaRichiesta) {
-        if (player.hasPermission("onlyclaim.admin")) return true;
+    public int getMaxChunksForPlayer(Player player) {
+        String adminPerm = plugin.getConfig().getString("admin-permission", "onlyclaim.admin");
+        if (player.hasPermission(adminPerm)) return -1;
 
         ConfigurationSection groups = plugin.getConfig().getConfigurationSection("groups");
-        if (groups == null) return false;
+        if (groups == null) return 4;
 
-        int maxChunks = 0;
+        int max = 0;
+        boolean hasInfinite = false;
 
-        // Controlla tutti i gruppi e prende il valore più alto tra quelli che il giocatore possiede
         for (String key : groups.getKeys(false)) {
-            String permission = groups.getString(key + ".permission");
-            if (permission != null && player.hasPermission(permission)) {
-                int groupMax = groups.getInt(key + ".max-chunks", 0);
-                if (groupMax > maxChunks) maxChunks = groupMax;
+            String perm = groups.getString(key + ".permission");
+            if (perm != null && player.hasPermission(perm)) {
+                int chunks = groups.getInt(key + ".max-chunks", 0);
+                if (chunks == -1) hasInfinite = true;
+                if (chunks > max) max = chunks;
             }
         }
 
-        int maxBlocksAllowed = maxChunks * 256; // 1 chunk = 16x16 = 256 blocchi
+        if (hasInfinite) return -1;
+        return (max == 0) ? 4 : max;
+    }
+
+    /**
+     * Verifica se il giocatore può claimare un'area aggiuntiva.
+     */
+    public boolean canClaimMore(Player player, int areaRichiesta) {
+        int maxChunks = getMaxChunksForPlayer(player);
+        if (maxChunks == -1) return true;
+
+        int maxBlocksAllowed = maxChunks * 256;
         int currentArea = getTotalUsedArea(player.getUniqueId());
 
         return (currentArea + areaRichiesta) <= maxBlocksAllowed;
     }
 
-    /**
-     * Restituisce una copia della lista per iterazioni sicure.
-     */
     public List<Claim> getAllClaims() {
         return new ArrayList<>(claims);
     }
