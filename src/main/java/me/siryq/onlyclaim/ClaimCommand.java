@@ -7,15 +7,18 @@ import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
-public class ClaimCommand implements CommandExecutor {
+public class ClaimCommand implements CommandExecutor, TabCompleter {
 
     private final OnlyClaim plugin;
 
@@ -24,7 +27,7 @@ public class ClaimCommand implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage(plugin.getConfigManager().getMessageRaw("only-players"));
             return true;
@@ -43,10 +46,86 @@ public class ClaimCommand implements CommandExecutor {
             case "view" -> viewClaim(player);
             case "rename" -> renameClaim(player, args);
             case "help" -> sendHelp(player);
+            case "flag" -> setClaimFlag(player, args);
+            case "rtp" -> plugin.getRtpManager().teleportRandomly(player);
             default -> giveClaimTool(player);
         }
 
         return true;
+    }
+
+    @Override
+    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
+        if (!(sender instanceof Player player)) return null;
+
+        if (args.length == 1) {
+            List<String> subCommands = List.of("create", "confirm", "delete", "remove", "subclaim", "view", "rename", "help", "flag", "rtp");
+            return filterTabs(subCommands, args[0]);
+        }
+
+        if (args.length == 2) {
+            if (List.of("delete", "remove", "rename", "flag").contains(args[0].toLowerCase())) {
+                List<String> claimNames = plugin.getClaimManager().getAllClaims().stream()
+                        .filter(c -> c.getOwner().equals(player.getUniqueId()) || player.hasPermission("onlyclaim.admin"))
+                        .map(Claim::getName)
+                        .collect(Collectors.toList());
+                return filterTabs(claimNames, args[1]);
+            }
+        }
+
+        if (args[0].equalsIgnoreCase("flag")) {
+            if (args.length == 3) {
+                return filterTabs(List.of("tnt", "interact", "block-break", "block-place"), args[2]);
+            }
+            if (args.length == 4) {
+                return filterTabs(List.of("true", "false"), args[3]);
+            }
+        }
+
+        return new ArrayList<>();
+    }
+
+    private List<String> filterTabs(List<String> list, String input) {
+        return list.stream()
+                .filter(s -> s.toLowerCase().startsWith(input.toLowerCase()))
+                .collect(Collectors.toList());
+    }
+
+    private void setClaimFlag(Player player, String[] args) {
+        if (args.length < 4) {
+            player.sendMessage(plugin.getConfigManager().getMessage("flag-usage"));
+            return;
+        }
+
+        Claim claim = plugin.getClaimManager().getClaimByName(args[1]);
+        if (claim == null) {
+            player.sendMessage(plugin.getConfigManager().getMessage("claim-not-found"));
+            return;
+        }
+
+        if (!claim.getOwner().equals(player.getUniqueId()) && !player.hasPermission("onlyclaim.admin")) {
+            player.sendMessage(plugin.getConfigManager().getMessage("no-permission"));
+            return;
+        }
+
+        String flag = args[2].toLowerCase();
+        boolean value = Boolean.parseBoolean(args[3]);
+
+        List<String> validFlags = List.of("tnt", "interact", "block-break", "block-place");
+        if (!validFlags.contains(flag)) {
+            player.sendMessage("§cFlag non valida! Usa: tnt, interact, block-break, block-place");
+            return;
+        }
+
+        claim.setFlag(flag, value);
+        plugin.getClaimManager().saveClaims();
+
+        String msg = plugin.getConfigManager().getMessage("flag-updated")
+                .replace("{flag}", flag)
+                .replace("{value}", String.valueOf(value))
+                .replace("{name}", claim.getName());
+        player.sendMessage(msg);
+        plugin.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME);
     }
 
     private void createNamedClaim(Player player, String[] args) {
@@ -60,7 +139,6 @@ public class ClaimCommand implements CommandExecutor {
             return;
         }
 
-        // Memorizziamo il nome scelto e diamo lo strumento
         plugin.setPendingName(player.getUniqueId(), customName);
         giveClaimTool(player);
 
@@ -72,18 +150,13 @@ public class ClaimCommand implements CommandExecutor {
     private void confirmClaim(Player player) {
         String finalName = plugin.getPendingName(player.getUniqueId());
 
-        // Se il giocatore non ha scelto un nome con /oc create <nome>
         if (finalName == null) {
-            // Peschiamo il formato dal lang.ym
             String format = plugin.getConfigManager().getMessageRaw("default-claim-name-format");
-
-            // Sostituiamo il placeholder con il nome del giocatore
             String baseName = format.replace("{player}", player.getName());
 
             finalName = baseName;
             int count = 1;
 
-            // Logica per evitare duplicati (es: Siriq_CLAIM_1, Siriq_CLAIM_2...)
             while (plugin.getClaimManager().exists(finalName)) {
                 finalName = baseName + "_" + count;
                 count++;
@@ -94,6 +167,7 @@ public class ClaimCommand implements CommandExecutor {
         plugin.clearPendingName(player.getUniqueId());
     }
 
+    @SuppressWarnings("deprecation")
     private void processClaimCreation(Player player, String name) {
         Location[] selection = plugin.getSelection(player.getUniqueId());
         if (selection == null || selection[0] == null || selection[1] == null) {
@@ -105,7 +179,10 @@ public class ClaimCommand implements CommandExecutor {
         int area = calculateArea(selection[0], selection[1]);
         if (!plugin.getClaimManager().canClaimMore(player, area)) {
             String maxBlocks = String.valueOf(getPlayerMaxChunks(player) * 256);
-            sendDisplay(player, "limit-exceeded", "limit-exceeded-sub", "{max}", maxBlocks);
+            String title = plugin.getConfigManager().getMessageRaw("limit-exceeded");
+            String sub = plugin.getConfigManager().getMessageRaw("limit-exceeded-sub").replace("{max}", maxBlocks);
+
+            player.sendTitle(title, sub, 10, 70, 20);
             plugin.playSound(player, Sound.ENTITY_VILLAGER_NO);
             return;
         }
@@ -129,7 +206,6 @@ public class ClaimCommand implements CommandExecutor {
         Claim targetClaim;
 
         if (args.length < 2) {
-            // Se non specifica il nome, prova a eliminare quello dove si trova
             targetClaim = plugin.getClaimManager().getClaimAt(player.getLocation());
             if (targetClaim == null) {
                 player.sendMessage(plugin.getConfigManager().getMessage("delete-usage"));
@@ -171,6 +247,7 @@ public class ClaimCommand implements CommandExecutor {
         player.sendMessage(plugin.getConfigManager().getMessage("view-claim"));
     }
 
+    @SuppressWarnings("deprecation")
     private void giveClaimTool(Player player) {
         if (!player.hasPermission("onlyclaim.command.tool")) {
             player.sendMessage(plugin.getConfigManager().getMessage("no-permission"));
@@ -197,6 +274,7 @@ public class ClaimCommand implements CommandExecutor {
         plugin.playSound(player, Sound.ENTITY_ITEM_PICKUP);
     }
 
+    @SuppressWarnings("deprecation")
     private void confirmSubClaim(Player player) {
         Location[] selection = plugin.getSelection(player.getUniqueId());
         if (selection == null || selection[0] == null || selection[1] == null) {
@@ -248,8 +326,7 @@ public class ClaimCommand implements CommandExecutor {
         plugin.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP);
     }
 
-    // --- UTILS ---
-
+    @SuppressWarnings("deprecation")
     private void removeClaimTool(Player player) {
         String toolName = plugin.getConfigManager().getMessageRaw("claim-tool-name");
         for (int i = 0; i < 9; i++) {
@@ -269,13 +346,6 @@ public class ClaimCommand implements CommandExecutor {
             if (item == null || item.getType() == Material.AIR) return true;
         }
         return false;
-    }
-
-    private void sendDisplay(Player player, String titleKey, String subKey, String placeholder, String replacement) {
-        String title = plugin.getConfigManager().getMessageRaw(titleKey);
-        String sub = plugin.getConfigManager().getMessageRaw(subKey);
-        if (placeholder != null && replacement != null) sub = sub.replace(placeholder, replacement);
-        player.sendTitle(title, sub, 10, 70, 20);
     }
 
     private boolean checkSubClaimLimits(Player player, Claim parent) {

@@ -52,6 +52,17 @@ exit-claim-title: "&eZona Libera"
 exit-claim-subtitle: "&7Puoi costruire liberamente"
 unknown-player: "Sconosciuto"
 
+
+# -------
+# RTP
+# -------
+rtp-prefix: "&5&lRTP&8»&r "
+rtp-searching: "{prefix}&e&oCercando una zona sicura..."
+rtp-no-location: "{prefix}&cNon abbiamo trovato zone sicure libere. Riprova!"
+rtp-cooldown-msg: "{prefix}&cAttendi ancora &6{time}s &cper riutilizzare l'RTP."
+rtp-title: "&a&lRTP"
+rtp-subtitle: "&7Ti trovi ora in una zona selvaggia!"
+
 # Utilizzo Comandi
 create-usage: "&cUtilizzo: /oc create <nome>"
 delete-usage: "&cUtilizzo: /oc delete <nome> (o trovati all'interno)"
@@ -59,6 +70,8 @@ rename-usage: "&cUtilizzo: /oc rename <nuovoNome>"
 claim-renamed: "&aTerritorio rinominato in: &f{name}"
 
 # Flag
+flag-usage: "&eUtilizzo: &f/oc flag <nome> <flag> <true|false>"
+flag-updated: "&aFlag &e{flag} &aimpostata su &e{value} &aper il claim &b{name}&a."
 flag-changed: "&eFlag {flag} impostato su {value}."
 
 # ------------------------------------------

@@ -3,6 +3,7 @@ package me.siryq.onlyclaim;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,16 +12,15 @@ import java.util.Map;
 import java.util.UUID;
 
 public class Claim implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final UUID owner;
     private String name;
-
-    // CORREZIONE: Usiamo il nome del mondo come stringa per evitare errori CraftWorld
     private final String worldName;
 
-    private final int minX, minY, minZ;
-    private final int maxX, maxY, maxZ;
+    private final int minX, minZ;
+    private final int maxX, maxZ;
 
     private final Map<String, Boolean> flags;
     private final List<Claim> subClaims;
@@ -33,11 +33,9 @@ public class Claim implements Serializable {
         this.isSubClaim = isSubClaim;
 
         this.minX = Math.min(pos1.getBlockX(), pos2.getBlockX());
-        this.minY = Math.min(pos1.getBlockY(), pos2.getBlockY());
         this.minZ = Math.min(pos1.getBlockZ(), pos2.getBlockZ());
 
         this.maxX = Math.max(pos1.getBlockX(), pos2.getBlockX());
-        this.maxY = Math.max(pos1.getBlockY(), pos2.getBlockY());
         this.maxZ = Math.max(pos1.getBlockZ(), pos2.getBlockZ());
 
         this.flags = new HashMap<>();
@@ -115,8 +113,6 @@ public class Claim implements Serializable {
 
     public int getMinX() { return minX; }
     public int getMaxX() { return maxX; }
-    public int getMinY() { return minY; }
-    public int getMaxY() { return maxY; }
     public int getMinZ() { return minZ; }
     public int getMaxZ() { return maxZ; }
 }

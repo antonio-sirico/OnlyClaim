@@ -62,3 +62,5 @@ admin-permission: "onlyclaim.admin"
 
 # Frequenza di salvataggio automatico (in minuti)
 autosave-interval: 10
+
+rtp-range: 5000

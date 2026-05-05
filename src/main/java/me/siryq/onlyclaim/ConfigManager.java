@@ -5,7 +5,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +12,6 @@ public class ConfigManager {
 
     private final OnlyClaim plugin;
     private FileConfiguration langConfig;
-    private File langFile;
 
     public ConfigManager(OnlyClaim plugin) {
         this.plugin = plugin;
@@ -34,7 +32,7 @@ public class ConfigManager {
     public void loadLanguage() {
         String langTag = plugin.getConfig().getString("language", "it");
         String fileName = "lang_" + langTag + ".yml";
-        langFile = new File(plugin.getDataFolder(), fileName);
+        File langFile = new File(plugin.getDataFolder(), fileName);
 
         if (!langFile.exists()) {
             // Salva il file dalla cartella resources del plugin se presente

@@ -1,6 +1,6 @@
 name: OnlyClaim
 main: me.siryq.onlyclaim.OnlyClaim
-version: '1.1.0'
+version: '1.2.0'
 api-version: '1.21.11' # Modifica in base alla versione del tuo server
 author: SiryQ
 description: Plugin avanzato per la protezione dei territori con supporto sottoclaim.

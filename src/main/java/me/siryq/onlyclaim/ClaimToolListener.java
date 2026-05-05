@@ -1,6 +1,5 @@
 package me.siryq.onlyclaim;
 
-import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -10,10 +9,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class ClaimToolListener implements Listener {
 
@@ -65,12 +61,8 @@ public class ClaimToolListener implements Listener {
             String pendingName = plugin.getPendingName(player.getUniqueId());
             String nameToShow;
 
-            if (pendingName != null) {
-                nameToShow = pendingName;
-            } else {
-                nameToShow = plugin.getConfigManager().getMessageRaw("default-claim-name-format")
-                        .replace("{player}", player.getName());
-            }
+            nameToShow = Objects.requireNonNullElseGet(pendingName, () -> plugin.getConfigManager().getMessageRaw("default-claim-name-format")
+                    .replace("{player}", player.getName()));
 
             // Recuperiamo la lista dal config e la inviamo riga per riga
             List<String> summary = plugin.getConfigManager().getMessageList("selection-summary");

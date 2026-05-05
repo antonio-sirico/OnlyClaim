@@ -24,7 +24,11 @@ public class ClaimManager {
      */
     public void saveClaims() {
         if (!plugin.getDataFolder().exists()) {
-            plugin.getDataFolder().mkdirs();
+            boolean created = plugin.getDataFolder().mkdirs();
+            if (!created) {
+                plugin.getLogger().warning("Impossibile creare la cartella dei dati!");
+                // Volendo puoi interrompere qui se la cartella è vitale
+            }
         }
 
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(dataFile))) {
@@ -33,7 +37,6 @@ public class ClaimManager {
             plugin.getLogger().severe("Errore critico nel salvataggio claims.dat: " + e.getMessage());
         }
     }
-
     /**
      * Carica la lista dei claim dal file binario .dat
      */

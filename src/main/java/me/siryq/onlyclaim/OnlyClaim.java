@@ -10,6 +10,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 public class OnlyClaim extends JavaPlugin {
@@ -18,6 +19,7 @@ public class OnlyClaim extends JavaPlugin {
     private ClaimManager claimManager;
     private ConfigManager configManager;
     private ClaimToolListener claimToolListener;
+    private RTPManager rtpManager;
 
     // Gestione dei Task per le particelle persistenti
     private final Map<UUID, Integer> particleTasks = new HashMap<>();
@@ -52,9 +54,12 @@ public class OnlyClaim extends JavaPlugin {
         getServer().getPluginManager().registerEvents(this.claimToolListener, this);
         getServer().getPluginManager().registerEvents(new ProtectionListener(this), this);
 
+        // Registarazione rtp
+        this.rtpManager = new RTPManager(this);
+
         // 4. Registrazione Comandi
         if (getCommand("onlyclaim") != null) {
-            getCommand("onlyclaim").setExecutor(new ClaimCommand(this));
+            Objects.requireNonNull(getCommand("onlyclaim")).setExecutor(new ClaimCommand(this));
         }
 
         // Messaggio di avvio elegante e colorato
@@ -172,4 +177,6 @@ public class OnlyClaim extends JavaPlugin {
     public ConfigManager getConfigManager() {
         return configManager;
     }
+
+    public RTPManager getRtpManager() { return rtpManager; }
 }
